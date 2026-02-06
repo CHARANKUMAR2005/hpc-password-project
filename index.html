@@ -7,53 +7,95 @@
 <style>
 body {
     margin: 0;
-    height: 100vh;
+    min-height: 100vh;
     background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    display: flex;
-    justify-content: center;
-    align-items: center;
     font-family: Arial, sans-serif;
     color: white;
 }
 
-.container {
-    background: rgba(0,0,0,0.85);
-    padding: 30px;
-    border-radius: 12px;
-    width: 440px;
-    text-align: center;
-    box-shadow: 0 0 25px rgba(0,255,255,0.3);
+header {
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0,0,0,0.7);
 }
 
-h1 {
-    margin: 5px 0;
+header h1 {
+    margin: 0;
+}
+
+#datetime {
+    font-size: 14px;
+    color: #00e6e6;
+}
+
+.main {
+    display: flex;
+    justify-content: center;
+    padding: 40px;
+}
+
+.container {
+    background: rgba(0,0,0,0.85);
+    padding: 35px;
+    border-radius: 14px;
+    width: 900px;
+    box-shadow: 0 0 30px rgba(0,255,255,0.3);
 }
 
 .subtitle {
-    font-size: 14px;
     color: #00e6e6;
     margin-bottom: 20px;
 }
 
 input {
     width: 100%;
-    padding: 12px;
-    border-radius: 6px;
+    padding: 14px;
+    border-radius: 8px;
     border: none;
-    font-size: 16px;
-    margin-bottom: 15px;
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+
+.strength-bar {
+    height: 10px;
+    width: 100%;
+    background: #333;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0%;
+    background: red;
+    transition: width 0.3s;
+}
+
+#strengthText {
+    font-size: 14px;
+    margin: 10px 0 20px;
+}
+
+.info {
+    background: #111;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
 }
 
 .buttons {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
 }
 
 button {
-    padding: 10px;
+    padding: 12px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-weight: bold;
     cursor: pointer;
     background: #00bcd4;
@@ -65,7 +107,7 @@ button:hover {
 }
 
 .full {
-    grid-column: span 2;
+    grid-column: span 3;
 }
 
 .danger {
@@ -74,54 +116,101 @@ button:hover {
 }
 
 #output {
-    margin-top: 15px;
-    background: #111;
-    padding: 12px;
-    border-radius: 6px;
-    min-height: 50px;
-    font-size: 14px;
-    text-align: left;
+    margin-top: 20px;
+    background: #000;
+    padding: 15px;
+    border-radius: 8px;
+    min-height: 70px;
+    font-size: 15px;
 }
 </style>
 </head>
 
 <body>
-<div class="container">
+
+<header>
     <h1>🔐 HPC Security Toolkit</h1>
-    <p class="subtitle">Password & Cryptography Module</p>
+    <div id="datetime"></div>
+</header>
 
-    <input type="password" id="password" placeholder="Enter password">
+<div class="main">
+<div class="container">
 
-    <div class="buttons">
-        <button onclick="checkStrength()">Strength</button>
-        <button onclick="generatePassword()">Generate</button>
-        <button onclick="hashPassword()">SHA-256 Hash</button>
-        <button onclick="verifyPassword()">Verify</button>
-        <button class="full" onclick="estimateBruteForce()">Brute Force Time (HPC)</button>
-        <button class="full danger" onclick="clearAll()">Clear</button>
-    </div>
+<p class="subtitle">Password & Cryptography Security Dashboard</p>
 
-    <div id="output">Output will appear here...</div>
+<input type="password" id="password" placeholder="Enter password" oninput="updateStrength()">
+
+<div class="strength-bar">
+    <div class="strength-fill" id="strengthFill"></div>
+</div>
+<div id="strengthText">Strength: 0%</div>
+
+<div class="info" id="locationInfo">
+    📍 Location: Detecting...
+</div>
+
+<div class="buttons">
+    <button onclick="checkStrength()">Strength</button>
+    <button onclick="generatePassword()">Generate</button>
+    <button onclick="hashPassword()">SHA-256 Hash</button>
+    <button onclick="verifyPassword()">Verify</button>
+    <button class="full" onclick="estimateBruteForce()">Brute Force Time (HPC)</button>
+    <button class="full danger" onclick="clearAll()">Clear</button>
+</div>
+
+<div id="output">Output will appear here...</div>
+
+</div>
 </div>
 
 <script>
 let storedHash = "";
 
-function checkStrength() {
+/* Date & Time */
+function updateDateTime() {
+    const now = new Date();
+    document.getElementById("datetime").innerText = now.toLocaleString();
+}
+setInterval(updateDateTime, 1000);
+updateDateTime();
+
+/* Location */
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            const lat = pos.coords.latitude.toFixed(4);
+            const lon = pos.coords.longitude.toFixed(4);
+            document.getElementById("locationInfo").innerHTML =
+                "📍 Location: Latitude " + lat + ", Longitude " + lon;
+        },
+        () => {
+            document.getElementById("locationInfo").innerHTML =
+                "📍 Location access denied by user";
+        }
+    );
+} else {
+    document.getElementById("locationInfo").innerHTML =
+        "📍 Location not supported";
+}
+
+/* Strength */
+function updateStrength() {
     const pwd = password.value;
-    let result = "Weak ❌";
+    let score = 0;
 
-    if (pwd.length >= 8 &&
-        /[A-Z]/.test(pwd) &&
-        /[a-z]/.test(pwd) &&
-        /[0-9]/.test(pwd) &&
-        /[^A-Za-z0-9]/.test(pwd)) {
-        result = "Very Strong ✅ (HPC-safe)";
-    } else if (pwd.length >= 6) {
-        result = "Medium ⚠️";
-    }
+    if (pwd.length >= 6) score += 20;
+    if (pwd.length >= 8) score += 20;
+    if (/[A-Z]/.test(pwd)) score += 20;
+    if (/[0-9]/.test(pwd)) score += 20;
+    if (/[^A-Za-z0-9]/.test(pwd)) score += 20;
 
-    show("Password Strength: " + result);
+    strengthFill.style.width = score + "%";
+    strengthFill.style.background = score < 40 ? "red" : score < 70 ? "orange" : "lime";
+    strengthText.innerText = "Strength: " + score + "%";
+}
+
+function checkStrength() {
+    show("Password strength evaluated successfully.");
 }
 
 function generatePassword() {
@@ -131,63 +220,50 @@ function generatePassword() {
         pwd += chars[Math.floor(Math.random() * chars.length)];
     }
     password.value = pwd;
+    updateStrength();
     show("Secure password generated.");
 }
 
 async function hashPassword() {
-    if (!password.value) {
-        show("Enter password first.");
-        return;
-    }
+    if (!password.value) return show("Enter password first.");
 
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password.value);
+    const data = new TextEncoder().encode(password.value);
     const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    storedHash = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    storedHash = Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, "0")).join("");
 
-    show("Password hashed using SHA-256 (HPC Secure):<br>" + storedHash);
+    show("SHA-256 Hash generated:<br>" + storedHash);
 }
 
 async function verifyPassword() {
-    if (!storedHash) {
-        show("Hash a password first.");
-        return;
-    }
+    if (!storedHash) return show("Hash password first.");
 
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password.value);
+    const data = new TextEncoder().encode(password.value);
     const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const newHash = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    const newHash = Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, "0")).join("");
 
-    show(newHash === storedHash ? 
-        "Password Verified ✅" : 
-        "Password Mismatch ❌");
+    show(newHash === storedHash ? "Password verified ✅" : "Password mismatch ❌");
 }
 
 function estimateBruteForce() {
-    if (!password.value) {
-        show("Enter password first.");
-        return;
-    }
+    if (!password.value) return show("Enter password first.");
 
     const combinations = Math.pow(94, password.value.length);
-    const hpcSpeed = 1e12; // 1 trillion guesses/sec
-    const seconds = combinations / hpcSpeed;
+    const seconds = combinations / 1e12;
+    const time = seconds < 60 ? seconds.toFixed(2) + " seconds"
+        : seconds < 3600 ? (seconds/60).toFixed(2) + " minutes"
+        : seconds < 86400 ? (seconds/3600).toFixed(2) + " hours"
+        : (seconds/86400).toFixed(2) + " days";
 
-    let time;
-    if (seconds < 60) time = seconds.toFixed(2) + " seconds";
-    else if (seconds < 3600) time = (seconds/60).toFixed(2) + " minutes";
-    else if (seconds < 86400) time = (seconds/3600).toFixed(2) + " hours";
-    else time = (seconds/86400).toFixed(2) + " days";
-
-    show("Estimated brute-force time using HPC cluster:<br>" + time);
+    show("Estimated HPC brute-force time:<br>" + time);
 }
 
 function clearAll() {
     password.value = "";
     storedHash = "";
+    strengthFill.style.width = "0%";
+    strengthText.innerText = "Strength: 0%";
     show("Cleared.");
 }
 
@@ -195,5 +271,6 @@ function show(msg) {
     output.innerHTML = msg;
 }
 </script>
+
 </body>
 </html>
