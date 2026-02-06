@@ -1,125 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Parallel Password Cracking | HPC Demo</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #1e293b;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        section {
-            padding: 20px;
-            margin: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h2 {
-            color: #1e293b;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #1d4ed8;
-        }
-        footer {
-            text-align: center;
-            padding: 10px;
-            color: #555;
-        }
-        .output {
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #eef2ff;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>SecurePass X | Cyber Security Console</title>
+
+<style>
+:root {
+  --bg: #060b10;
+  --panel: #0f1720;
+  --neon: #00ffe1;
+  --danger: #ff3b3b;
+  --warn: #ffaa00;
+  --safe: #00ff7f;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: radial-gradient(circle at top, #08131f, #020407);
+  color: #e5f7ff;
+}
+
+.container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 25px;
+}
+
+h1 {
+  text-align: center;
+  color: var(--neon);
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #7fdde0;
+  margin-bottom: 30px;
+}
+
+.panel {
+  background: var(--panel);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 0 25px rgba(0,255,225,0.15);
+  margin-bottom: 20px;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  background: #02070c;
+  color: var(--neon);
+  margin-bottom: 10px;
+}
+
+button {
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: black;
+  font-weight: bold;
+  margin: 5px;
+}
+
+button.danger {
+  background: linear-gradient(135deg, #ff4b2b, #ff416c);
+}
+
+button.secondary {
+  background: #1b2836;
+  color: var(--neon);
+}
+
+.meter {
+  height: 12px;
+  background: #111;
+  border-radius: 6px;
+  margin: 10px 0;
+}
+
+#bar {
+  height: 12px;
+  width: 0%;
+  background: var(--danger);
+  border-radius: 6px;
+  transition: 0.4s;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.status {
+  font-weight: bold;
+}
+
+.low { color: var(--safe); }
+.medium { color: var(--warn); }
+.high { color: var(--danger); }
+
+.box {
+  background: #0a121b;
+  padding: 12px;
+  border-radius: 10px;
+  border-left: 4px solid var(--neon);
+}
+
+.log {
+  font-family: monospace;
+  font-size: 13px;
+  color: #8be9fd;
+}
+</style>
 </head>
+
 <body>
 
-<header>
-    <h1>Parallel Password Cracking</h1>
-    <p>High Performance Computing (HPC) – Educational Demo</p>
-</header>
+<div class="container">
+  <h1>🔐 SecurePass X</h1>
+  <p class="subtitle">Enterprise Cyber Security Password Intelligence System</p>
 
-<section>
-    <h2>What is this project?</h2>
-    <p>
-        This project demonstrates <b>Parallel Password Cracking</b> using the concept of
-        <b>High Performance Computing (HPC)</b>. It is only a <b>learning simulation</b>, not real hacking.
-    </p>
-</section>
+  <!-- PASSWORD INPUT -->
+  <div class="panel">
+    <input type="password" id="pwd" placeholder="Enter password for security scan">
+    <button onclick="toggle()">👁 Toggle Visibility</button>
+    <button class="secondary" onclick="resetAll()">⟲ Reset</button>
 
-<section>
-    <h2>How it works (Simple English)</h2>
-    <ul>
-        <li>A sample password is already fixed inside the program.</li>
-        <li>The system tries many password combinations.</li>
-        <li>Multiple CPU cores work at the same time (parallel processing).</li>
-        <li>The correct password is found faster.</li>
-    </ul>
-</section>
+    <div class="meter"><div id="bar"></div></div>
+    <div id="score">Security Score: 0 / 100</div>
+    <div id="risk" class="status">Risk Level: —</div>
+  </div>
 
-<section>
-    <h2>Demo Simulation</h2>
-    <p>Click the button below to simulate password checking.</p>
-    <button onclick="runDemo()">Start Simulation</button>
-    <div id="result" class="output"></div>
-</section>
+  <!-- ANALYSIS -->
+  <div class="panel grid">
+    <div class="box" id="analysis"></div>
+    <div class="box" id="entropy"></div>
+    <div class="box" id="bruteforce"></div>
+  </div>
 
-<section>
-    <h2>Why HPC is used?</h2>
-    <p>
-        HPC helps reduce time by dividing work among multiple CPU cores.
-        This improves speed and efficiency compared to single-core execution.
-    </p>
-</section>
+  <!-- CONTROLS -->
+  <div class="panel">
+    <button onclick="simulateAttack()">⚠️ Simulate Attack</button>
+    <button onclick="fakeLogin()" class="danger">🚨 Fake Login Attempt</button>
+    <button onclick="generate()">🧠 Generate Secure Password</button>
+  </div>
 
-<section>
-    <h2>Important Note</h2>
-    <p>
-        This project is strictly for <b>educational purposes</b>. It does not crack real passwords
-        and does not access any real accounts.
-    </p>
-</section>
-
-<footer>
-    <p>Mini Project | HPC | Beginner Level</p>
-</footer>
+  <!-- LOG -->
+  <div class="panel">
+    <h3>🖥 Security Event Log</h3>
+    <div id="log" class="log"></div>
+  </div>
+</div>
 
 <script>
-    function runDemo() {
-        const passwords = ["000", "045", "123", "678", "999"]; // sample attempts
-        const correct = "123";
-        let output = "";
+const pwd = document.getElementById("pwd");
+const bar = document.getElementById("bar");
+const scoreBox = document.getElementById("score");
+const riskBox = document.getElementById("risk");
+const analysis = document.getElementById("analysis");
+const entropyBox = document.getElementById("entropy");
+const bruteBox = document.getElementById("bruteforce");
+const log = document.getElementById("log");
 
-        for (let i = 0; i < passwords.length; i++) {
-            if (passwords[i] === correct) {
-                output = "Password Found: " + passwords[i];
-                break;
-            } else {
-                output = "Trying passwords in parallel...";
-            }
-        }
-        document.getElementById("result").innerText = output;
-    }
+const common = ["123456","password","qwerty","admin","abc123","111111"];
+
+pwd.addEventListener("input", analyze);
+
+function toggle() {
+  pwd.type = pwd.type === "password" ? "text" : "password";
+}
+
+function resetAll() {
+  pwd.value = "";
+  analyze();
+  log.innerText = "";
+}
+
+function analyze() {
+  let p = pwd.value;
+  let score = 0;
+
+  if (p.length >= 8) score += 20;
+  if (/[A-Z]/.test(p)) score += 20;
+  if (/[a-z]/.test(p)) score += 20;
+  if (/[0-9]/.test(p)) score += 20;
+  if (/[^A-Za-z0-9]/.test(p)) score += 20;
+
+  bar.style.width = score + "%";
+  bar.style.background =
+    score < 40 ? "var(--danger)" :
+    score < 70 ? "var(--warn)" :
+    "var(--safe)";
+
+  scoreBox.innerText = `Security Score: ${score} / 100`;
+
+  let risk =
+    score < 40 ? "CRITICAL" :
+    score < 70 ? "HIGH" :
+    score < 90 ? "MEDIUM" :
+    "LOW";
+
+  riskBox.innerHTML = `Risk Level: <span class="${risk.toLowerCase()}">${risk}</span>`;
+
+  analysis.innerHTML = `
+    <b>Analysis</b><br>
+    Length: ${p.length}<br>
+    Common Password: ${common.includes(p)}<br>
+    Symbols Used: ${/[^A-Za-z0-9]/.test(p)}
+  `;
+
+  let entropy = Math.round(p.length * Math.log2(94));
+  entropyBox.innerHTML = `<b>Entropy</b><br>${entropy} bits`;
+
+  bruteBox.innerHTML =
+    `<b>Brute Force Resistance</b><br>
+     Estimated crack time: ${estimateTime(entropy)}`;
+}
+
+function estimateTime(e) {
+  if (e < 40) return "Seconds";
+  if (e < 60) return "Minutes";
+  if (e < 80) return "Hours";
+  if (e < 100) return "Years";
+  return "Centuries";
+}
+
+function simulateAttack() {
+  log.innerText += "⚠️ Attack simulation started...\n";
+  setTimeout(() => {
+    log.innerText += "❌ Firewall blocked attack.\n";
+  }, 800);
+}
+
+function fakeLogin() {
+  log.innerText += "🚨 Unauthorized login attempt detected!\n";
+}
+
+function generate() {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+  let pass = "";
+  for (let i = 0; i < 14; i++)
+    pass += chars[Math.floor(Math.random() * chars.length)];
+  pwd.value = pass;
+  log.innerText += "🧠 Secure password generated.\n";
+  analyze();
+}
 </script>
 
 </body>
