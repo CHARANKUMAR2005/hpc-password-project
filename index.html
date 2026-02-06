@@ -2,259 +2,198 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SecurePass X | Cyber Security Console</title>
+<title>HPC Security Toolkit</title>
 
 <style>
-:root {
-  --bg: #060b10;
-  --panel: #0f1720;
-  --neon: #00ffe1;
-  --danger: #ff3b3b;
-  --warn: #ffaa00;
-  --safe: #00ff7f;
-}
-
 body {
-  margin: 0;
-  font-family: "Segoe UI", Arial, sans-serif;
-  background: radial-gradient(circle at top, #08131f, #020407);
-  color: #e5f7ff;
+    margin: 0;
+    height: 100vh;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    color: white;
 }
 
 .container {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 25px;
+    background: rgba(0,0,0,0.85);
+    padding: 30px;
+    border-radius: 12px;
+    width: 440px;
+    text-align: center;
+    box-shadow: 0 0 25px rgba(0,255,255,0.3);
 }
 
 h1 {
-  text-align: center;
-  color: var(--neon);
-  letter-spacing: 2px;
+    margin: 5px 0;
 }
 
 .subtitle {
-  text-align: center;
-  color: #7fdde0;
-  margin-bottom: 30px;
-}
-
-.panel {
-  background: var(--panel);
-  border-radius: 14px;
-  padding: 20px;
-  box-shadow: 0 0 25px rgba(0,255,225,0.15);
-  margin-bottom: 20px;
+    font-size: 14px;
+    color: #00e6e6;
+    margin-bottom: 20px;
 }
 
 input {
-  width: 100%;
-  padding: 14px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: none;
-  background: #02070c;
-  color: var(--neon);
-  margin-bottom: 10px;
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: none;
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+.buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
 }
 
 button {
-  background: linear-gradient(135deg, #00c6ff, #0072ff);
-  border: none;
-  padding: 10px 18px;
-  border-radius: 8px;
-  cursor: pointer;
-  color: black;
-  font-weight: bold;
-  margin: 5px;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    background: #00bcd4;
+    color: black;
 }
 
-button.danger {
-  background: linear-gradient(135deg, #ff4b2b, #ff416c);
+button:hover {
+    background: #00e6e6;
 }
 
-button.secondary {
-  background: #1b2836;
-  color: var(--neon);
+.full {
+    grid-column: span 2;
 }
 
-.meter {
-  height: 12px;
-  background: #111;
-  border-radius: 6px;
-  margin: 10px 0;
+.danger {
+    background: #ff4d4d;
+    color: white;
 }
 
-#bar {
-  height: 12px;
-  width: 0%;
-  background: var(--danger);
-  border-radius: 6px;
-  transition: 0.4s;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
-}
-
-.status {
-  font-weight: bold;
-}
-
-.low { color: var(--safe); }
-.medium { color: var(--warn); }
-.high { color: var(--danger); }
-
-.box {
-  background: #0a121b;
-  padding: 12px;
-  border-radius: 10px;
-  border-left: 4px solid var(--neon);
-}
-
-.log {
-  font-family: monospace;
-  font-size: 13px;
-  color: #8be9fd;
+#output {
+    margin-top: 15px;
+    background: #111;
+    padding: 12px;
+    border-radius: 6px;
+    min-height: 50px;
+    font-size: 14px;
+    text-align: left;
 }
 </style>
 </head>
 
 <body>
-
 <div class="container">
-  <h1>🔐 SecurePass X</h1>
-  <p class="subtitle">Enterprise Cyber Security Password Intelligence System</p>
+    <h1>🔐 HPC Security Toolkit</h1>
+    <p class="subtitle">Password & Cryptography Module</p>
 
-  <!-- PASSWORD INPUT -->
-  <div class="panel">
-    <input type="password" id="pwd" placeholder="Enter password for security scan">
-    <button onclick="toggle()">👁 Toggle Visibility</button>
-    <button class="secondary" onclick="resetAll()">⟲ Reset</button>
+    <input type="password" id="password" placeholder="Enter password">
 
-    <div class="meter"><div id="bar"></div></div>
-    <div id="score">Security Score: 0 / 100</div>
-    <div id="risk" class="status">Risk Level: —</div>
-  </div>
+    <div class="buttons">
+        <button onclick="checkStrength()">Strength</button>
+        <button onclick="generatePassword()">Generate</button>
+        <button onclick="hashPassword()">SHA-256 Hash</button>
+        <button onclick="verifyPassword()">Verify</button>
+        <button class="full" onclick="estimateBruteForce()">Brute Force Time (HPC)</button>
+        <button class="full danger" onclick="clearAll()">Clear</button>
+    </div>
 
-  <!-- ANALYSIS -->
-  <div class="panel grid">
-    <div class="box" id="analysis"></div>
-    <div class="box" id="entropy"></div>
-    <div class="box" id="bruteforce"></div>
-  </div>
-
-  <!-- CONTROLS -->
-  <div class="panel">
-    <button onclick="simulateAttack()">⚠️ Simulate Attack</button>
-    <button onclick="fakeLogin()" class="danger">🚨 Fake Login Attempt</button>
-    <button onclick="generate()">🧠 Generate Secure Password</button>
-  </div>
-
-  <!-- LOG -->
-  <div class="panel">
-    <h3>🖥 Security Event Log</h3>
-    <div id="log" class="log"></div>
-  </div>
+    <div id="output">Output will appear here...</div>
 </div>
 
 <script>
-const pwd = document.getElementById("pwd");
-const bar = document.getElementById("bar");
-const scoreBox = document.getElementById("score");
-const riskBox = document.getElementById("risk");
-const analysis = document.getElementById("analysis");
-const entropyBox = document.getElementById("entropy");
-const bruteBox = document.getElementById("bruteforce");
-const log = document.getElementById("log");
+let storedHash = "";
 
-const common = ["123456","password","qwerty","admin","abc123","111111"];
+function checkStrength() {
+    const pwd = password.value;
+    let result = "Weak ❌";
 
-pwd.addEventListener("input", analyze);
+    if (pwd.length >= 8 &&
+        /[A-Z]/.test(pwd) &&
+        /[a-z]/.test(pwd) &&
+        /[0-9]/.test(pwd) &&
+        /[^A-Za-z0-9]/.test(pwd)) {
+        result = "Very Strong ✅ (HPC-safe)";
+    } else if (pwd.length >= 6) {
+        result = "Medium ⚠️";
+    }
 
-function toggle() {
-  pwd.type = pwd.type === "password" ? "text" : "password";
+    show("Password Strength: " + result);
 }
 
-function resetAll() {
-  pwd.value = "";
-  analyze();
-  log.innerText = "";
+function generatePassword() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&!";
+    let pwd = "";
+    for (let i = 0; i < 12; i++) {
+        pwd += chars[Math.floor(Math.random() * chars.length)];
+    }
+    password.value = pwd;
+    show("Secure password generated.");
 }
 
-function analyze() {
-  let p = pwd.value;
-  let score = 0;
+async function hashPassword() {
+    if (!password.value) {
+        show("Enter password first.");
+        return;
+    }
 
-  if (p.length >= 8) score += 20;
-  if (/[A-Z]/.test(p)) score += 20;
-  if (/[a-z]/.test(p)) score += 20;
-  if (/[0-9]/.test(p)) score += 20;
-  if (/[^A-Za-z0-9]/.test(p)) score += 20;
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password.value);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    storedHash = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 
-  bar.style.width = score + "%";
-  bar.style.background =
-    score < 40 ? "var(--danger)" :
-    score < 70 ? "var(--warn)" :
-    "var(--safe)";
-
-  scoreBox.innerText = `Security Score: ${score} / 100`;
-
-  let risk =
-    score < 40 ? "CRITICAL" :
-    score < 70 ? "HIGH" :
-    score < 90 ? "MEDIUM" :
-    "LOW";
-
-  riskBox.innerHTML = `Risk Level: <span class="${risk.toLowerCase()}">${risk}</span>`;
-
-  analysis.innerHTML = `
-    <b>Analysis</b><br>
-    Length: ${p.length}<br>
-    Common Password: ${common.includes(p)}<br>
-    Symbols Used: ${/[^A-Za-z0-9]/.test(p)}
-  `;
-
-  let entropy = Math.round(p.length * Math.log2(94));
-  entropyBox.innerHTML = `<b>Entropy</b><br>${entropy} bits`;
-
-  bruteBox.innerHTML =
-    `<b>Brute Force Resistance</b><br>
-     Estimated crack time: ${estimateTime(entropy)}`;
+    show("Password hashed using SHA-256 (HPC Secure):<br>" + storedHash);
 }
 
-function estimateTime(e) {
-  if (e < 40) return "Seconds";
-  if (e < 60) return "Minutes";
-  if (e < 80) return "Hours";
-  if (e < 100) return "Years";
-  return "Centuries";
+async function verifyPassword() {
+    if (!storedHash) {
+        show("Hash a password first.");
+        return;
+    }
+
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password.value);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const newHash = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+
+    show(newHash === storedHash ? 
+        "Password Verified ✅" : 
+        "Password Mismatch ❌");
 }
 
-function simulateAttack() {
-  log.innerText += "⚠️ Attack simulation started...\n";
-  setTimeout(() => {
-    log.innerText += "❌ Firewall blocked attack.\n";
-  }, 800);
+function estimateBruteForce() {
+    if (!password.value) {
+        show("Enter password first.");
+        return;
+    }
+
+    const combinations = Math.pow(94, password.value.length);
+    const hpcSpeed = 1e12; // 1 trillion guesses/sec
+    const seconds = combinations / hpcSpeed;
+
+    let time;
+    if (seconds < 60) time = seconds.toFixed(2) + " seconds";
+    else if (seconds < 3600) time = (seconds/60).toFixed(2) + " minutes";
+    else if (seconds < 86400) time = (seconds/3600).toFixed(2) + " hours";
+    else time = (seconds/86400).toFixed(2) + " days";
+
+    show("Estimated brute-force time using HPC cluster:<br>" + time);
 }
 
-function fakeLogin() {
-  log.innerText += "🚨 Unauthorized login attempt detected!\n";
+function clearAll() {
+    password.value = "";
+    storedHash = "";
+    show("Cleared.");
 }
 
-function generate() {
-  const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
-  let pass = "";
-  for (let i = 0; i < 14; i++)
-    pass += chars[Math.floor(Math.random() * chars.length)];
-  pwd.value = pass;
-  log.innerText += "🧠 Secure password generated.\n";
-  analyze();
+function show(msg) {
+    output.innerHTML = msg;
 }
 </script>
-
 </body>
 </html>
